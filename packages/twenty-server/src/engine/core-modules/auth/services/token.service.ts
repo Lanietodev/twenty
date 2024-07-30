@@ -12,40 +12,40 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import crypto from 'crypto';
 
-import { addMilliseconds, differenceInMilliseconds } from 'date-fns';
-import ms from 'ms';
-import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
-import { IsNull, MoreThan, Repository } from 'typeorm';
-import { Request } from 'express';
-import { ExtractJwt } from 'passport-jwt';
 import { render } from '@react-email/render';
+import { addMilliseconds, differenceInMilliseconds } from 'date-fns';
+import { Request } from 'express';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import ms from 'ms';
+import { ExtractJwt } from 'passport-jwt';
 import { PasswordResetLinkEmail } from 'twenty-emails';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 
 import {
-  JwtAuthStrategy,
-  JwtPayload,
-} from 'src/engine/core-modules/auth/strategies/jwt.auth.strategy';
-import { assert } from 'src/utils/assert';
+  AppToken,
+  AppTokenType,
+} from 'src/engine/core-modules/app-token/app-token.entity';
+import { EmailPasswordResetLink } from 'src/engine/core-modules/auth/dto/email-password-reset-link.entity';
+import { ExchangeAuthCode } from 'src/engine/core-modules/auth/dto/exchange-auth-code.entity';
+import { ExchangeAuthCodeInput } from 'src/engine/core-modules/auth/dto/exchange-auth-code.input';
+import { InvalidatePassword } from 'src/engine/core-modules/auth/dto/invalidate-password.entity';
 import {
   ApiKeyToken,
   AuthToken,
   AuthTokens,
   PasswordResetToken,
 } from 'src/engine/core-modules/auth/dto/token.entity';
-import { EnvironmentService } from 'src/engine/integrations/environment/environment.service';
-import { User } from 'src/engine/core-modules/user/user.entity';
-import {
-  AppToken,
-  AppTokenType,
-} from 'src/engine/core-modules/app-token/app-token.entity';
 import { ValidatePasswordResetToken } from 'src/engine/core-modules/auth/dto/validate-password-reset-token.entity';
-import { EmailService } from 'src/engine/integrations/email/email.service';
-import { InvalidatePassword } from 'src/engine/core-modules/auth/dto/invalidate-password.entity';
-import { EmailPasswordResetLink } from 'src/engine/core-modules/auth/dto/email-password-reset-link.entity';
+import {
+  JwtAuthStrategy,
+  JwtPayload,
+} from 'src/engine/core-modules/auth/strategies/jwt.auth.strategy';
 import { JwtData } from 'src/engine/core-modules/auth/types/jwt-data.type';
+import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
-import { ExchangeAuthCodeInput } from 'src/engine/core-modules/auth/dto/exchange-auth-code.input';
-import { ExchangeAuthCode } from 'src/engine/core-modules/auth/dto/exchange-auth-code.entity';
+import { EmailService } from 'src/engine/integrations/email/email.service';
+import { EnvironmentService } from 'src/engine/integrations/environment/environment.service';
+import { assert } from 'src/utils/assert';
 
 @Injectable()
 export class TokenService {
