@@ -54,7 +54,7 @@ export type MatchColumnsStepProps<T extends string> = {
     rawData: ImportedRow[],
     columns: Columns<T>,
   ) => void;
-  onBack: () => void;
+  onBack?: () => void;
 };
 
 export enum ColumnType {

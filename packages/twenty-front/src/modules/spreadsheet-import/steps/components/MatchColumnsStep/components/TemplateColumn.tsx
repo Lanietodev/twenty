@@ -27,6 +27,7 @@ export const TemplateColumn = <T extends string>({
   const { fields } = useSpreadsheetImportInternal<T>();
   const column = columns[columnIndex];
   const isIgnored = column.type === ColumnType.ignored;
+
   const fieldOptions = fields.map(({ icon, label, key }) => {
     const isSelected =
       columns.findIndex((column) => {
@@ -44,6 +45,7 @@ export const TemplateColumn = <T extends string>({
       disabled: isSelected,
     } as const;
   });
+
   const selectOptions = [
     {
       icon: IconForbid,
@@ -52,9 +54,11 @@ export const TemplateColumn = <T extends string>({
     },
     ...fieldOptions,
   ];
+
   const selectValue = fieldOptions.find(
     ({ value }) => 'value' in column && column.value === value,
   );
+
   const ignoreValue = selectOptions.find(
     ({ value }) => value === 'do-not-import',
   );
