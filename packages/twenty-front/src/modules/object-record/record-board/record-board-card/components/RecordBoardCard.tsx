@@ -13,7 +13,7 @@ import {
   RecordUpdateHookParams,
 } from '@/object-record/record-field/contexts/FieldContext';
 import { getFieldButtonIcon } from '@/object-record/record-field/utils/getFieldButtonIcon';
-import { RecordIndexRecordChip } from '@/object-record/record-index/components/RecordIndexRecordChip';
+import { RecordIdentifierChip } from '@/object-record/record-index/components/RecordIndexRecordChip';
 import { RecordInlineCell } from '@/object-record/record-inline-cell/components/RecordInlineCell';
 import { InlineCellHotkeyScope } from '@/object-record/record-inline-cell/types/InlineCellHotkeyScope';
 import { RecordValueSetterEffect } from '@/object-record/record-store/components/RecordValueSetterEffect';
@@ -210,6 +210,10 @@ export const RecordBoardCard = () => {
     return null;
   }
 
+  const visibleFieldDefinitionsFiltered = visibleFieldDefinitions.filter(
+    (boardField) => !boardField.isLabelIdentifier,
+  );
+
   return (
     <StyledBoardCardWrapper onContextMenu={handleContextMenu}>
       <RecordValueSetterEffect recordId={recordId} />
@@ -222,7 +226,7 @@ export const RecordBoardCard = () => {
         }}
       >
         <StyledBoardCardHeader showCompactView={isCompactModeActive}>
-          <RecordIndexRecordChip
+          <RecordIdentifierChip
             objectNameSingular={objectMetadataItem.nameSingular}
             record={record}
             variant={AvatarChipVariant.Transparent}
@@ -252,7 +256,7 @@ export const RecordBoardCard = () => {
             isOpen={!isCardInCompactMode || !isCompactModeActive}
             initial={false}
           >
-            {visibleFieldDefinitions.map((fieldDefinition) => (
+            {visibleFieldDefinitionsFiltered.map((fieldDefinition) => (
               <PreventSelectOnClickContainer
                 key={fieldDefinition.fieldMetadataId}
               >
