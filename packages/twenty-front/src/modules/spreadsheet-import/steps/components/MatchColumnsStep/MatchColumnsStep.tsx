@@ -124,6 +124,11 @@ export const MatchColumnsStep = <T extends string>({
   headerValues,
   onContinue,
 }: MatchColumnsStepProps<T>) => {
+  console.log({
+    data,
+    headerValues,
+  });
+
   const { enqueueDialog } = useDialogManager();
   const { enqueueSnackBar } = useSnackBar();
   const dataExample = data.slice(0, 2);
@@ -207,10 +212,13 @@ export const MatchColumnsStep = <T extends string>({
     },
     [columns, setColumns],
   );
+
   const unmatchedRequiredFields = useMemo(
     () => findUnmatchedRequiredFields(fields, columns),
     [fields, columns],
   );
+
+  console.log({ fields, unmatchedRequiredFields, columns });
 
   const handleAlertOnContinue = useCallback(async () => {
     setIsLoading(true);

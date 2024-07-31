@@ -1,7 +1,7 @@
 import { Meta } from '@storybook/react';
 
 import { ModalWrapper } from '@/spreadsheet-import/components/ModalWrapper';
-import { Providers } from '@/spreadsheet-import/components/Providers';
+import { ReactSpreadsheetImportContextProvider } from '@/spreadsheet-import/components/ReactSpreadsheetImportContextProvider';
 import { SelectSheetStep } from '@/spreadsheet-import/steps/components/SelectSheetStep/SelectSheetStep';
 import { mockRsiValues } from '@/spreadsheet-import/tests/mockRsiValues';
 import { DialogManagerScope } from '@/ui/feedback/dialog-manager/scopes/DialogManagerScope';
@@ -20,7 +20,7 @@ const sheetNames = ['Sheet1', 'Sheet2', 'Sheet3'];
 
 export const Default = () => (
   <DialogManagerScope dialogManagerScopeId="dialog-manager">
-    <Providers values={mockRsiValues}>
+    <ReactSpreadsheetImportContextProvider values={mockRsiValues}>
       <ModalWrapper isOpen={true} onClose={() => null}>
         <SelectSheetStep
           sheetNames={sheetNames}
@@ -28,6 +28,6 @@ export const Default = () => (
           onBack={() => Promise.resolve()}
         />
       </ModalWrapper>
-    </Providers>
+    </ReactSpreadsheetImportContextProvider>
   </DialogManagerScope>
 );
