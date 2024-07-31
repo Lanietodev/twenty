@@ -2,8 +2,8 @@ import { IconComponent, ThemeColor } from 'twenty-ui';
 import { ReadonlyDeep } from 'type-fest';
 
 import { Columns } from '@/spreadsheet-import/steps/components/MatchColumnsStep/MatchColumnsStep';
-import { StepState } from '@/spreadsheet-import/steps/components/UploadFlow';
 import { ImportedStructuredRowMetadata } from '@/spreadsheet-import/steps/components/ValidationStep/types';
+import { SpreadsheetImportStep } from '@/spreadsheet-import/steps/types/SpreadsheetImportStep';
 
 export type SpreadsheetImportDialogOptions<FieldNames extends string> = {
   // Is modal visible.
@@ -47,7 +47,7 @@ export type SpreadsheetImportDialogOptions<FieldNames extends string> = {
   // Headers matching accuracy: 1 for strict and up for more flexible matching
   autoMapDistance?: number;
   // Initial Step state to be rendered on load
-  initialStepState?: StepState;
+  initialStepState?: SpreadsheetImportStep;
   // Sets SheetJS dateNF option. If date parsing is applied, date will be formatted e.g. "yyyy-mm-dd hh:mm:ss", "m/d/yy h:mm", 'mmm-yy', etc.
   dateFormat?: string;
   // Sets SheetJS "raw" option. If true, parsing will only be applied to xlsx date fields.

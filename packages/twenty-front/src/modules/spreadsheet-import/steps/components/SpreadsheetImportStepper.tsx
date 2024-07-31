@@ -1,10 +1,8 @@
 import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useCallback, useState } from 'react';
-import { WorkBook } from 'xlsx-ugnis';
 
 import { useSpreadsheetImportInternal } from '@/spreadsheet-import/hooks/useSpreadsheetImportInternal';
-import { ImportedRow } from '@/spreadsheet-import/types';
 import { exceedsMaxRecords } from '@/spreadsheet-import/utils/exceedsMaxRecords';
 import { mapWorkbook } from '@/spreadsheet-import/utils/mapWorkbook';
 import { CircularProgressBar } from '@/ui/feedback/progress-bar/components/CircularProgressBar';
@@ -12,7 +10,9 @@ import { SnackBarVariant } from '@/ui/feedback/snack-bar-manager/components/Snac
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { Modal } from '@/ui/layout/modal/components/Modal';
 
-import { Columns, MatchColumnsStep } from './MatchColumnsStep/MatchColumnsStep';
+import { SpreadsheetImportStep } from '@/spreadsheet-import/steps/types/SpreadsheetImportStep';
+import { SpreadsheetImportStepType } from '@/spreadsheet-import/steps/types/SpreadsheetImportStepType';
+import { MatchColumnsStep } from './MatchColumnsStep/MatchColumnsStep';
 import { SelectHeaderStep } from './SelectHeaderStep/SelectHeaderStep';
 import { SelectSheetStep } from './SelectSheetStep/SelectSheetStep';
 import { UploadStep } from './UploadStep/UploadStep';
@@ -24,54 +24,26 @@ const StyledProgressBarContainer = styled(Modal.Content)`
   justify-content: center;
 `;
 
-export enum StepType {
-  upload = 'upload',
-  selectSheet = 'selectSheet',
-  selectHeader = 'selectHeader',
-  matchColumns = 'matchColumns',
-  validateData = 'validateData',
-  loading = 'loading',
-}
-export type StepState =
-  | {
-      type: StepType.upload;
-    }
-  | {
-      type: StepType.selectSheet;
-      workbook: WorkBook;
-    }
-  | {
-      type: StepType.selectHeader;
-      data: ImportedRow[];
-    }
-  | {
-      type: StepType.matchColumns;
-      data: ImportedRow[];
-      headerValues: ImportedRow;
-    }
-  | {
-      type: StepType.validateData;
-      data: any[];
-      importedColumns: Columns<string>;
-    }
-  | {
-      type: StepType.loading;
-    };
-
-interface UploadFlowProps {
+type SpreadsheetImportStepperProps = {
   nextStep: () => void;
   prevStep: () => void;
-}
+};
 
-export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
+export const SpreadsheetImportStepper = ({
+  nextStep,
+  prevStep,
+}: SpreadsheetImportStepperProps) => {
   const theme = useTheme();
+
   const { initialStepState } = useSpreadsheetImportInternal();
-  const [state, setState] = useState<StepState>(
-    initialStepState || { type: StepType.upload },
+
+  const [state, setState] = useState<SpreadsheetImportStep>(
+    initialStepState || { type: SpreadsheetImportStepType.upload },
   );
-  const [previousState, setPreviousState] = useState<StepState>(
-    initialStepState || { type: StepType.upload },
+  const [previousState, setPreviousState] = useState<SpreadsheetImportStep>(
+    initialStepState || { type: SpreadsheetImportStepType.upload },
   );
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const {
     maxRecords,
@@ -98,7 +70,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
   }, [prevStep, previousState]);
 
   switch (state.type) {
-    case StepType.upload:
+    case SpreadsheetImportStepType.upload:
       return (
         <UploadStep
           onContinue={async (workbook, file) => {
@@ -124,7 +96,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
 
                 if (selectHeader) {
                   setState({
-                    type: StepType.selectHeader,
+                    type: SpreadsheetImportStepType.selectHeader,
                     data: mappedWorkbook,
                   });
                 } else {
@@ -135,7 +107,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
                     await selectHeaderStepHook(mappedWorkbook[0], trimmedData);
 
                   setState({
-                    type: StepType.matchColumns,
+                    type: SpreadsheetImportStepType.matchColumns,
                     data,
                     headerValues,
                   });
@@ -144,14 +116,17 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
                 errorToast((e as Error).message);
               }
             } else {
-              setState({ type: StepType.selectSheet, workbook });
+              setState({
+                type: SpreadsheetImportStepType.selectSheet,
+                workbook,
+              });
             }
             setPreviousState(state);
             nextStep();
           }}
         />
       );
-    case StepType.selectSheet:
+    case SpreadsheetImportStepType.selectSheet:
       return (
         <SelectSheetStep
           sheetNames={state.workbook.SheetNames}
@@ -170,7 +145,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
                 mapWorkbook(state.workbook, sheetName),
               );
               setState({
-                type: StepType.selectHeader,
+                type: SpreadsheetImportStepType.selectHeader,
                 data: mappedWorkbook,
               });
               setPreviousState(state);
@@ -181,7 +156,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
           onBack={onBack}
         />
       );
-    case StepType.selectHeader:
+    case SpreadsheetImportStepType.selectHeader:
       return (
         <SelectHeaderStep
           importedRows={state.data}
@@ -190,7 +165,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
               const { importedRows: data, headerRow: headerValues } =
                 await selectHeaderStepHook(...args);
               setState({
-                type: StepType.matchColumns,
+                type: SpreadsheetImportStepType.matchColumns,
                 data,
                 headerValues,
               });
@@ -203,7 +178,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
           onBack={onBack}
         />
       );
-    case StepType.matchColumns:
+    case SpreadsheetImportStepType.matchColumns:
       return (
         <MatchColumnsStep
           data={state.data}
@@ -212,7 +187,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
             try {
               const data = await matchColumnsStepHook(values, rawData, columns);
               setState({
-                type: StepType.validateData,
+                type: SpreadsheetImportStepType.validateData,
                 data,
                 importedColumns: columns,
               });
@@ -228,7 +203,7 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
           }
         />
       );
-    case StepType.validateData:
+    case SpreadsheetImportStepType.validateData:
       if (!uploadedFile) {
         throw new Error('File not found');
       }
@@ -239,16 +214,18 @@ export const UploadFlow = ({ nextStep, prevStep }: UploadFlowProps) => {
           file={uploadedFile}
           onSubmitStart={() =>
             setState({
-              type: StepType.loading,
+              type: SpreadsheetImportStepType.loading,
             })
           }
           onBack={() => {
             onBack();
-            setPreviousState(initialStepState || { type: StepType.upload });
+            setPreviousState(
+              initialStepState || { type: SpreadsheetImportStepType.upload },
+            );
           }}
         />
       );
-    case StepType.loading:
+    case SpreadsheetImportStepType.loading:
     default:
       return (
         <StyledProgressBarContainer>
