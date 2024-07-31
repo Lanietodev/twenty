@@ -67,25 +67,6 @@ export type ImportedStructuredRow<T extends string> = {
 // Data model RSI uses for spreadsheet imports
 export type Fields<T extends string> = ReadonlyDeep<Field<T>[]>;
 
-export type Field<T extends string> = {
-  // Icon
-  icon: IconComponent | null | undefined;
-  // UI-facing field label
-  label: string;
-  // Field's unique identifier
-  key: T;
-  // UI-facing additional information displayed via tooltip and ? icon
-  description?: string;
-  // Alternate labels used for fields' auto-matching, e.g. "fname" -> "firstName"
-  alternateMatches?: string[];
-  // Validations used for field entries
-  fieldValidationDefinitions?: FieldValidationDefinition[];
-  // Field entry component, default: Input
-  fieldType: Checkbox | Select | Input;
-  // UI-facing values shown to user as field examples pre-upload phase
-  example?: string;
-};
-
 export type Checkbox = {
   type: 'checkbox';
   // Alternate values to be treated as booleans, e.g. {yes: true, no: false}
@@ -113,6 +94,27 @@ export type SelectOption = {
 
 export type Input = {
   type: 'input';
+};
+
+export type SpreadsheetImportFieldType = Checkbox | Select | Input;
+
+export type Field<T extends string> = {
+  // Icon
+  icon: IconComponent | null | undefined;
+  // UI-facing field label
+  label: string;
+  // Field's unique identifier
+  key: T;
+  // UI-facing additional information displayed via tooltip and ? icon
+  description?: string;
+  // Alternate labels used for fields' auto-matching, e.g. "fname" -> "firstName"
+  alternateMatches?: string[];
+  // Validations used for field entries
+  fieldValidationDefinitions?: FieldValidationDefinition[];
+  // Field entry component, default: Input
+  fieldType: SpreadsheetImportFieldType;
+  // UI-facing values shown to user as field examples pre-upload phase
+  example?: string;
 };
 
 export type FieldValidationDefinition =
