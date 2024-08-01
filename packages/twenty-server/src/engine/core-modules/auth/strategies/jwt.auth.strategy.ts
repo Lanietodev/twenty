@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -10,11 +6,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
 
 import { TypeORMService } from 'src/database/typeorm/typeorm.service';
+import {
+  AuthException,
+  AuthExceptionCode,
+} from 'src/engine/core-modules/auth/auth.exception';
 import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { EnvironmentService } from 'src/engine/integrations/environment/environment.service';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
-import { assert } from 'src/utils/assert';
 
 export type JwtPayload = { sub: string; workspaceId: string; jti?: string };
 export type PassportUser = { user?: User; workspace: Workspace };
@@ -43,8 +42,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
 
     if (!workspace) {
-      throw new UnauthorizedException();
+      throw new AuthException(
+        'Workspace not found',
+        AuthExceptionCode.INVALID_INPUT,
+      );
     }
+
     if (payload.jti) {
       const dataSourceMetadata =
         await this.dataSourceService.getLastDataSourceMetadataFromWorkspaceIdOrFail(
@@ -59,11 +62,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
         [payload.jti],
       );
 
-      assert(
-        apiKey.length === 1 && !apiKey?.[0].revokedAt,
-        'This API Key is revoked',
-        ForbiddenException,
-      );
+      if (!(apiKey.length === 1 && !apiKey?.[0].revokedAt)) {
+        throw new AuthException(
+          'This API Key is revoked',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
     }
 
     let user;
@@ -74,7 +78,10 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
         relations: ['defaultWorkspace'],
       });
       if (!user) {
-        throw new UnauthorizedException();
+        throw new AuthException(
+          'User not found',
+          AuthExceptionCode.INVALID_INPUT,
+        );
       }
     }
 
